@@ -3,7 +3,9 @@ var path = require('path');
 
 //connect to the mongo
 var db = require('mongoskin').db("mongodb://localhost/testdb", { w: 0});
-	db.bind('record');
+	db.bind('events');
+	db.bind('persons');
+	db.bind('documents');
 
 //create the app instance
 var app = express();
@@ -14,19 +16,21 @@ app.use(express.bodyParser());
 
 
 //response for saving operations
-function after_update(err, res, record){
+function after_update(err, res, events){
     if (err){
     	res.status(500);
     	res.send({ error:err.toString() });
     } else {
-    	res.send(record || {});
+    	res.send(events || {});
     }
 }
 
 
-//data loading
-app.get('/data', function(req, res){
-	db.record.find().toArray(function(err, data){
+//:entity loading
+app.get('/:entity', function(req, res){
+	console.log(req.param("entity"));
+	entity = req.param("entity");
+	db[req.param("entity")].find().toArray(function(err, data){
 		for (var i = 0; i < data.length; i++){
 			//map _id to id
 			data[i].id = data[i]._id;
@@ -37,24 +41,24 @@ app.get('/data', function(req, res){
 });
 
 //adding
-app.post('/data', function(req, res){
-	db.record.insert(req.body, function(err, record){
+app.post('/:entity', function(req, res){
+	db.events.insert(req.body, function(err, events){
 		if (err) return res.send({ status:"error" });
 		res.send({ newid:req.body._id });
 	});
 });
 
 //updating
-app.put('/data/:id', function(req, res){
-	db.record.updateById(req.param("id"), req.body, function(err){ 
+app.put('/:entity/:id', function(req, res){
+	db.events.updateById(req.param("id"), req.body, function(err){
 		if (err) return res.send({ status:"error" });
 		res.send({});
 	});
 });
 
 //deleting
-app.delete('/data/:id', function(req, res){
-	db.record.removeById(req.param("id"), req.body, function(err){ 
+app.delete('/:entity/:id', function(req, res){
+	db.events.removeById(req.param("id"), req.body, function(err){
 		if (err) return res.send({ status:"error" });
 		res.send({});
 	});
