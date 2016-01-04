@@ -2,17 +2,177 @@
 <html>
 
 <head>
-    <script type="text/javascript" src="./ckeditor.js"></script>
     <script type="text/javascript" src="./webix.js"></script>
     <link rel="stylesheet" type="text/css" href="./webix.css">
 </head>
 
 <body>
     <script>
+        console.log($$);
+        /**
+         * Helpers
+         */
+        function getActiveEntity() {
+            return $$("tabbar").data.value;
+        }
+        //var getFieldsList = function(en) {
+        //    var colIdList = [];
+        //    var colList = $$(en).columns;
+        //    for (colList.length - 1; i >= 0; i--) {
+        //        colIdList[i] = colList.id;
+        //    }
+        //    return colIdList;
+        //}
+        function showModal() {
+            var a = this.data.action;
+            var en = getActiveEntity();
+            console.log("modal" + a + en);
+            $$("modal" + a + en).show();
+        }
+
+
+        /**
+         * CRUD
+         */
+        function addItem() {
+            $$(getActiveEntity()).add({
+                name: "New item"
+            });
+        }
+
+        function editItem() {
+            //console.log($$(getActiveEntity()));
+            //var entityId = $$("tabbar").data.value;
+            //$$(entityId).updateItem({
+            //    name: "New item"
+            //});
+        }
+
+        function removeItem() {
+            var entityId = $$("tabbar").data.value;
+            $$(entityId).remove($$(entityId).getSelectedId(true));
+        }
+
+        function submitForm(a) {
+            console.log(a);
+            //if (this.getParentView().validate()) { //validate form
+            //    message("All is correct");
+            //    this.getTopParentView().hide(); //hide window
+            //} else
+            //    message({
+            //        type: "error",
+            //        text: "Form data is invalid"
+            //    });
+        }
+
+
+        function formContainer(obj) {
+
+            webix.ui({
+                view: "form",
+                id: "form" + obj.a + obj.en,
+                complexData: true,
+                borderless: true,
+                elements: [{
+                    name: "name",
+                    view: "text",
+                    label: "Название"
+                }, {
+                    name: "username",
+                    view: "text",
+                    label: "Имя"
+                }, {
+                    name: "sirname",
+                    view: "text",
+                    label: "Фамилия"
+                }, {
+                    name: "editor",
+                    view: "ckeditor",
+                    label: "Содержание"
+                }, {
+                    name: "start_date",
+                    view: "datepicker",
+                    label: "Дата начала"
+                }, {
+                    name: "end_date",
+                    view: "datepicker",
+                    label: "Дата окончания"
+                }, {
+                    name: "status",
+                    view: "select",
+                    label: "Статус"
+                }, {
+                    name: "state",
+                    view: "button",
+                    label: "Состояние"
+                }, {
+                    view: "button",
+                    value: "Submit",
+                    click: submitForm
+                }],
+                //rules: {
+                //    "email": webix.rules.isEmail,
+                //    "login": webix.rules.isNotEmpty
+                //},
+                elementsConfig: {
+                    labelPosition: "top"
+                }
+            });
+
+
+            //console.log(this);
+            //processForm(obj.a, obj.en);
+        }
+
+        /**
+         * Popup modals
+         */
+        function prepareModal(a, en) {
+            var head = a + " " + en;
+            console.log(a+en);
+            webix.ui({
+                view: "window",
+                id: "modal" + a + en,
+                autofit: false,
+                head: [{
+                    view: "button",
+                    label: "Close",
+                    width: 70,
+                    click: function() {
+                        this.getTopParentView().hide();
+                    }
+                }, {
+                    view: "label",
+                    label: head,
+                    inputWidth: 100,
+                    align: "center"
+                }],
+                modal: true,
+                move: true,
+                position: "center",
+                body: {
+                    data: {
+                        a: a,
+                        en: en
+                    },
+                    template: formContainer
+                }
+            }).show();
+        }
+
         webix.ready(function() {
 
             //path from which extra libraries are autoloaded
             webix.codebase = "./";
+
+            function custom_checkbox(obj, common, value) {
+                if (value) {
+                    return "<div class='webix_table_checkbox checked'> ВКЛ </div>";
+                } else {
+                    return "<div class='webix_table_checkbox notchecked'> ВЫКЛ </div>";
+                }
+            }
+
 
             /**
              * Data templates
@@ -53,9 +213,15 @@
                     header: "Статус",
                     editor: "select",
                     options: ["", "Активно", "Закрыто"]
-                }, ],
+                }, {
+                    id: "state",
+                    header: "Состояние",
+                    template: custom_checkbox,
+                    width: 120,
+                    editor: "inline-checkbox"
+                }],
                 editable: true,
-                editaction: "dblclick",
+                editaction: "click",
                 url: "/events",
                 save: "rest->/events"
             };
@@ -64,7 +230,7 @@
                 view: "datatable",
                 select: "row",
                 columns: [{
-                    id: "name",
+                    id: "username",
                     header: "Имя",
                     editor: "text"
                 }, {
@@ -97,6 +263,12 @@
                     header: "Статус",
                     editor: "select",
                     options: ["", "Активно", "Закрыто"]
+                }, {
+                    id: "state",
+                    header: "Состояние",
+                    template: custom_checkbox,
+                    width: 120,
+                    editor: "inline-checkbox"
                 }],
                 editable: true,
                 editaction: "dblclick",
@@ -113,13 +285,32 @@
                     editor: "text",
                     fillspace: 1
                 }, {
-                    id: "year",
+                    id: "description",
+                    header: "Описание",
                     editor: "text"
                 }, {
+                    id: "publish_date",
+                    header: "Дата публикации",
+                    view: "datepicker",
+                    editor: "date",
+                    timepicker: true,
+                    stringResult: true,
+                    format: "%d %M %Y at %H:%i"
+                }, {
+                    id: "published",
+                    editor: "checkbox"
+                }, {
                     id: "status",
+                    header: "Статус",
                     editor: "select",
-                    options: ["", "Active", "Closed"]
-                }, ],
+                    options: ["", "Активно", "Закрыто"]
+                }, {
+                    id: "state",
+                    header: "Состояние",
+                    template: custom_checkbox,
+                    width: 120,
+                    editor: "inline-checkbox"
+                }],
                 editable: false,
                 editaction: "dblclick",
                 url: "/documents",
@@ -127,46 +318,6 @@
             };
 
 
-            /**
-             * Helpers
-             */
-            var getActiveEntity = function() {
-                return $$("tabbar").data.value;
-            }
-            var getFieldsList = function(en) {
-                var colIdList = [];
-                var colList = $$(en).columns;
-                for (colList.length - 1; i >= 0; i--) {
-                    colIdList[i] = colList.id;
-                }
-                return colIdList;
-            }
-            var openModal = function() {
-                var a = this.data.action;
-                var en = getActiveEntity();
-                $$("modal" + a + en).show();
-            }
-
-
-            /**
-             * CRUD
-             */
-            var addItem = function() {
-                $$(getActiveEntity()).add({
-                    name: "New item"
-                });
-            }
-            var editItem = function() {
-                console.log($$(getActiveEntity()));
-                //var entityId = $$("tabbar").data.value;
-                //$$(entityId).updateItem({
-                //    name: "New item"
-                //});
-            }
-            var removeItem = function() {
-                var entityId = $$("tabbar").data.value;
-                $$(entityId).remove($$(entityId).getSelectedId(true));
-            }
 
 
             /**
@@ -180,13 +331,13 @@
                     multiview: true,
                     options: [{
                         value: "Календарь",
-                        id: "events",
+                        id: "events"
                     }, {
                         value: "Люди",
-                        id: "persons",
+                        id: "persons"
                     }, {
                         value: "Документы",
-                        id: "documents",
+                        id: "documents"
                     }]
                 }, {
                     view: "toolbar",
@@ -202,23 +353,20 @@
                         view: "button",
                         icon: "plus-square-o",
                         label: "Добавить",
-                        //popup: "add",
                         action: "add",
-                        click: openModal
+                        click: showModal
                     }, {
                         view: "button",
                         icon: "edit",
                         label: "Редактировать",
-                        //popup: "edit",
                         action: "edit",
-                        click: openModal
+                        click: showModal
                     }, {
                         view: "button",
                         icon: "times",
                         label: "Удалить",
-                        //popup: "remove",
                         action: "remove",
-                        click: openModal
+                        click: showModal
                     }, {
                         gravity: 4
                     }, {
@@ -236,75 +384,6 @@
                 }]
             });
 
-            var submitForm = function(a, en) {
-                console.log(a, en);
-                //if (this.getParentView().validate()) { //validate form
-                //    webix.message("All is correct");
-                //    this.getTopParentView().hide(); //hide window
-                //} else
-                //    webix.message({
-                //        type: "error",
-                //        text: "Form data is invalid"
-                //    });
-            }
-
-            /**
-             * Forms in modals
-             */
-            var processForm = function(a, en) {
-                return {
-                    view: "form",
-                    id: "form" + a + en,
-                    complexData: true,
-                    borderless: true,
-                    elements: [{
-                        view: "text",
-                        label: 'Login',
-                        name: "login"
-                    }, {
-                        id: "editor",
-                        view: "ckeditor",
-                        value: "..." //text and HTML markup
-                    }, {
-                        view: "text", //label: "Дата начала",
-                        label: 'Email',
-                        name: "email" //label: "Дата конца",
-                    }, {
-                        view: "button",
-                        value: "Submit",
-                        click: submitForm(a, en)
-                    }],
-                    rules: {
-                        "email": webix.rules.isEmail,
-                        "login": webix.rules.isNotEmpty
-                    },
-                    elementsConfig: {
-                        labelPosition: "top",
-                    }
-                };
-            }
-
-
-            /**
-             * Popup modals
-             */
-            var prepareModal = function(a, en) {
-                var head = a + " " + en;
-                webix.ui({
-                    view: "window",
-                    id: "modal" + a + en,
-                    autofit: false,
-                    head: head,
-                    modal: true,
-                    move: true,
-                    position: "center",
-                    body: function() {
-                        return processForm(a, en);
-                    },
-                    //click: $$id
-                }).hide();
-            }
-
 
             var enArr = $$("tabbar").data.options;
             var i = 0;
@@ -313,8 +392,8 @@
                 var k = 0;
                 for (k; k <= aArr.length - 3; k++) {
                     prepareModal(aArr[k].data.action, enArr[i].id);
-                }
-            }
+                };
+            };
 
         });
     </script>

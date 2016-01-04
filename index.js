@@ -53,10 +53,10 @@ function after_update(err, res, events) {
 //    });
 //}
 
-var eventItem = db.events.findOne();
-for (var key in eventItem) {
-    console.log(key);
-}
+//var eventItem = db.events.findOne();
+//for (var key in eventItem) {
+//    //console.log(key);
+//}
 //console.log(db.events.findOne());
 
 
