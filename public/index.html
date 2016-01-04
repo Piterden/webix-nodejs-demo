@@ -11,166 +11,114 @@
     webix.ready(function() {
 
         var events = {
-            rows: [{
-                view: "toolbar",
-                elements: [{
-                    view: "button",
-                    value: "Add row",
-                    click: function(id) {
-                        console.log(id);
-                        $$("events").add({
-                            name: "New item"
-                        });
-                    }
-                }, {
-                    view: "button",
-                    value: "Delete row",
-                    click: function(id) {
-                        console.log(id);
-                        $$("events").remove($$("events").getSelectedId(true));
-                    }
-                }, {
-                    gravity: 2
-                }]
+            id: "events",
+            view: "datatable",
+            select: "row",
+            columns: [{
+                id: "name",
+                header: "Name",
+                editor: "text",
+                fillspace: 1
             }, {
-                id: "events",
-                view: "datatable",
-                select: "row",
-                columns: [{
-                    id: "name",
-                    header: "Name",
-                    editor: "text",
-                    fillspace: 1
-                }, {
-                    id: "year",
-                    editor: "text"
-                }, {
-                    id: "status",
-                    editor: "select",
-                    options: ["", "Active", "Closed"]
-                }, ],
-                editable: true,
-                editaction: "dblclick",
-                url: "/events",
-                save: "rest->/events"
-            }]
+                id: "year",
+                editor: "text"
+            }, {
+                id: "status",
+                editor: "select",
+                options: ["", "Active", "Closed"]
+            }, ],
+            editable: true,
+            editaction: "dblclick",
+            url: "/events",
+            save: "rest->/events"
+
         };
         var persons = {
-            rows: [{
-                view: "toolbar",
-                elements: [{
-                    view: "button",
-                    value: "Add row",
-                    click: function(id) {
-                        console.log(id);
-                        $$("events").add({
-                            name: "New item"
-                        });
-                    }
-                }, {
-                    view: "button",
-                    value: "Delete row",
-                    click: function(id) {
-                        console.log(id);
-                        $$("events").remove($$("events").getSelectedId(true));
-                    }
-                }, {
-                    gravity: 2
-                }]
+            id: "persons",
+            view: "datatable",
+            select: "row",
+            columns: [{
+                id: "name",
+                header: "Name",
+                editor: "text",
+                fillspace: 1
             }, {
-                id: "persons",
-                view: "datatable",
-                select: "row",
-                columns: [{
-                    id: "name",
-                    header: "Name",
-                    editor: "text",
-                    fillspace: 1
-                }, {
-                    id: "year",
-                    editor: "text"
-                }, {
-                    id: "status",
-                    editor: "select",
-                    options: ["", "Active", "Closed"]
-                }, ],
-                editable: true,
-                editaction: "dblclick",
-                url: "/persons",
-                save: "rest->/persons"
-            }]
+                id: "year",
+                editor: "text"
+            }, {
+                id: "status",
+                editor: "select",
+                options: ["", "Active", "Closed"]
+            }, ],
+            editable: true,
+            editaction: "dblclick",
+            url: "/persons",
+            save: "rest->/persons"
+
         };
         var documents = {
-            rows: [{
-                view: "toolbar",
-                elements: [{
-                    view: "button",
-                    value: "Add row",
-                    click: function(id) {
-                        console.log(id);
-                        $$("events").add({
-                            name: "New item"
-                        });
-                    }
-                }, {
-                    view: "button",
-                    value: "Delete row",
-                    click: function(id) {
-                        console.log(id);
-                        $$("events").remove($$("events").getSelectedId(true));
-                    }
-                }, {
-                    gravity: 2
-                }]
+            id: "documents",
+            view: "datatable",
+            select: "row",
+            columns: [{
+                id: "name",
+                header: "Name",
+                editor: "text",
+                fillspace: 1
             }, {
-                id: "documents",
-                view: "datatable",
-                select: "row",
-                columns: [{
-                    id: "name",
-                    header: "Name",
-                    editor: "text",
-                    fillspace: 1
-                }, {
-                    id: "year",
-                    editor: "text"
-                }, {
-                    id: "status",
-                    editor: "select",
-                    options: ["", "Active", "Closed"]
-                }, ],
-                editable: true,
-                editaction: "dblclick",
-                url: "/documents",
-                save: "rest->/documents"
-            }]
+                id: "year",
+                editor: "text"
+            }, {
+                id: "status",
+                editor: "select",
+                options: ["", "Active", "Closed"]
+            }, ],
+            editable: true,
+            editaction: "dblclick",
+            url: "/documents",
+            save: "rest->/documents"
         };
 
-        //function add_row() {
-        //    $$("events").add({
-        //        name: "New item"
-        //    });
-        //}
-        //
-        //        //function delete_row() {
-        //        //    $$("events").remove($$("events").getSelectedId(true));
-        //}
+        var addItem = function() {
+            var entityId = $$("tabbar").data.value;
+            $$(entityId).add({
+                name: "New item"
+            });
+        };
+
+        var deleteItem = function() {
+            var entityId = $$("tabbar").data.value;
+            $$(entityId).remove($$(entityId).getSelectedId(true));
+        }
 
         webix.ui({
             rows: [{
                 view: "segmented",
-                id: 'tabbar',
-                value: 'events',
+                id: "tabbar",
+                value: "events",
                 multiview: true,
                 options: [{
-                    value: 'Календарь',
-                    id: 'events'
+                    value: "Календарь",
+                    id: "events"
                 }, {
-                    value: 'Люди',
-                    id: 'persons'
+                    value: "Люди",
+                    id: "persons"
                 }, {
-                    value: 'Документы',
-                    id: 'documents'
+                    value: "Документы",
+                    id: "documents"
+                }]
+            }, {
+                view: "toolbar",
+                elements: [{
+                    view: "button",
+                    value: "Add item",
+                    click: addItem
+                }, {
+                    view: "button",
+                    value: "Delete item",
+                    click: deleteItem
+                }, {
+                    gravity: 1
                 }]
             }, {
                 view: "multiview",
