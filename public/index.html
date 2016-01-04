@@ -2,133 +2,322 @@
 <html>
 
 <head>
+    <script type="text/javascript" src="./ckeditor.js"></script>
     <script type="text/javascript" src="./webix.js"></script>
     <link rel="stylesheet" type="text/css" href="./webix.css">
 </head>
 
 <body>
     <script>
-    webix.ready(function() {
+        webix.ready(function() {
 
-        var events = {
-            id: "events",
-            view: "datatable",
-            select: "row",
-            columns: [{
-                id: "name",
-                header: "Name",
-                editor: "text",
-                fillspace: 1
-            }, {
-                id: "year",
-                editor: "text"
-            }, {
-                id: "status",
-                editor: "select",
-                options: ["", "Active", "Closed"]
-            }, ],
-            editable: true,
-            editaction: "dblclick",
-            url: "/events",
-            save: "rest->/events"
+            //path from which extra libraries are autoloaded
+            webix.codebase = "./";
 
-        };
-        var persons = {
-            id: "persons",
-            view: "datatable",
-            select: "row",
-            columns: [{
-                id: "name",
-                header: "Name",
-                editor: "text",
-                fillspace: 1
-            }, {
-                id: "year",
-                editor: "text"
-            }, {
-                id: "status",
-                editor: "select",
-                options: ["", "Active", "Closed"]
-            }, ],
-            editable: true,
-            editaction: "dblclick",
-            url: "/persons",
-            save: "rest->/persons"
+            /**
+             * Data templates
+             */
+            var events = {
+                id: "events",
+                view: "datatable",
+                select: "row",
+                columns: [{
+                    id: "name",
+                    header: "Название",
+                    editor: "text",
+                    fillspace: 1
+                }, {
+                    id: "description",
+                    header: "Описание",
+                    editor: "text"
+                }, {
+                    id: "start_date",
+                    header: "Начало",
+                    view: "datepicker",
+                    editor: "date",
+                    name: "start_date",
+                    timepicker: true,
+                    stringResult: true,
+                    format: "%d %M %Y at %H:%i"
+                }, {
+                    id: "end_date",
+                    view: "datepicker",
+                    header: "Конец",
+                    editor: "date",
+                    name: "end_date",
+                    timepicker: true,
+                    stringResult: true,
+                    format: "%d %M %Y at %H:%i"
+                }, {
+                    id: "status",
+                    header: "Статус",
+                    editor: "select",
+                    options: ["", "Активно", "Закрыто"]
+                }, ],
+                editable: true,
+                editaction: "dblclick",
+                url: "/events",
+                save: "rest->/events"
+            };
+            var persons = {
+                id: "persons",
+                view: "datatable",
+                select: "row",
+                columns: [{
+                    id: "name",
+                    header: "Имя",
+                    editor: "text"
+                }, {
+                    id: "surname",
+                    header: "Фамилия",
+                    editor: "text",
+                    fillspace: 1
+                }, {
+                    id: "start_date",
+                    header: "Приибытие",
+                    view: "datepicker",
+                    editor: "date",
+                    timepicker: true,
+                    stringResult: true,
+                    format: "%d %M %Y at %H:%i"
+                }, {
+                    id: "end_date",
+                    view: "datepicker",
+                    header: "Отправление",
+                    editor: "date",
+                    timepicker: true,
+                    stringResult: true,
+                    format: "%d %M %Y at %H:%i"
+                }, {
+                    id: "description",
+                    header: "Описание",
+                    editor: "text"
+                }, {
+                    id: "status",
+                    header: "Статус",
+                    editor: "select",
+                    options: ["", "Активно", "Закрыто"]
+                }],
+                editable: true,
+                editaction: "dblclick",
+                url: "/persons",
+                save: "rest->/persons"
+            };
+            var documents = {
+                id: "documents",
+                view: "datatable",
+                select: "row",
+                columns: [{
+                    id: "name",
+                    header: "Название",
+                    editor: "text",
+                    fillspace: 1
+                }, {
+                    id: "year",
+                    editor: "text"
+                }, {
+                    id: "status",
+                    editor: "select",
+                    options: ["", "Active", "Closed"]
+                }, ],
+                editable: false,
+                editaction: "dblclick",
+                url: "/documents",
+                save: "rest->/documents"
+            };
 
-        };
-        var documents = {
-            id: "documents",
-            view: "datatable",
-            select: "row",
-            columns: [{
-                id: "name",
-                header: "Name",
-                editor: "text",
-                fillspace: 1
-            }, {
-                id: "year",
-                editor: "text"
-            }, {
-                id: "status",
-                editor: "select",
-                options: ["", "Active", "Closed"]
-            }, ],
-            editable: true,
-            editaction: "dblclick",
-            url: "/documents",
-            save: "rest->/documents"
-        };
 
-        var addItem = function() {
-            var entityId = $$("tabbar").data.value;
-            $$(entityId).add({
-                name: "New item"
+            /**
+             * Helpers
+             */
+            var getActiveEntity = function() {
+                return $$("tabbar").data.value;
+            }
+            var getFieldsList = function(en) {
+                var colIdList = [];
+                var colList = $$(en).columns;
+                for (colList.length - 1; i >= 0; i--) {
+                    colIdList[i] = colList.id;
+                }
+                return colIdList;
+            }
+            var openModal = function() {
+                var a = this.data.action;
+                var en = getActiveEntity();
+                $$("modal" + a + en).show();
+            }
+
+
+            /**
+             * CRUD
+             */
+            var addItem = function() {
+                $$(getActiveEntity()).add({
+                    name: "New item"
+                });
+            }
+            var editItem = function() {
+                console.log($$(getActiveEntity()));
+                //var entityId = $$("tabbar").data.value;
+                //$$(entityId).updateItem({
+                //    name: "New item"
+                //});
+            }
+            var removeItem = function() {
+                var entityId = $$("tabbar").data.value;
+                $$(entityId).remove($$(entityId).getSelectedId(true));
+            }
+
+
+            /**
+             * Main layout
+             */
+            webix.ui({
+                rows: [{
+                    view: "tabbar",
+                    id: "tabbar",
+                    value: "events",
+                    multiview: true,
+                    options: [{
+                        value: "Календарь",
+                        id: "events",
+                    }, {
+                        value: "Люди",
+                        id: "persons",
+                    }, {
+                        value: "Документы",
+                        id: "documents",
+                    }]
+                }, {
+                    view: "toolbar",
+                    id: "toolbar",
+                    elementsConfig: {
+                        gravity: 2,
+                        align: "center",
+                        type: "icon",
+                        height: 46,
+                        adjust: true
+                    },
+                    elements: [{
+                        view: "button",
+                        icon: "plus-square-o",
+                        label: "Добавить",
+                        //popup: "add",
+                        action: "add",
+                        click: openModal
+                    }, {
+                        view: "button",
+                        icon: "edit",
+                        label: "Редактировать",
+                        //popup: "edit",
+                        action: "edit",
+                        click: openModal
+                    }, {
+                        view: "button",
+                        icon: "times",
+                        label: "Удалить",
+                        //popup: "remove",
+                        action: "remove",
+                        click: openModal
+                    }, {
+                        gravity: 4
+                    }, {
+                        view: "search",
+                        placeholder: "Поиск...",
+                        gravity: 2
+                            //hotkey: "ctrl+f"
+                    }]
+                }, {
+                    view: "multiview",
+                    cells: [events, persons, documents],
+                    animate: {
+                        subtype: "in"
+                    }
+                }]
             });
-        };
 
-        var deleteItem = function() {
-            var entityId = $$("tabbar").data.value;
-            $$(entityId).remove($$(entityId).getSelectedId(true));
-        }
+            var submitForm = function(a, en) {
+                console.log(a, en);
+                //if (this.getParentView().validate()) { //validate form
+                //    webix.message("All is correct");
+                //    this.getTopParentView().hide(); //hide window
+                //} else
+                //    webix.message({
+                //        type: "error",
+                //        text: "Form data is invalid"
+                //    });
+            }
 
-        webix.ui({
-            rows: [{
-                view: "segmented",
-                id: "tabbar",
-                value: "events",
-                multiview: true,
-                options: [{
-                    value: "Календарь",
-                    id: "events"
-                }, {
-                    value: "Люди",
-                    id: "persons"
-                }, {
-                    value: "Документы",
-                    id: "documents"
-                }]
-            }, {
-                view: "toolbar",
-                elements: [{
-                    view: "button",
-                    value: "Add item",
-                    click: addItem
-                }, {
-                    view: "button",
-                    value: "Delete item",
-                    click: deleteItem
-                }, {
-                    gravity: 1
-                }]
-            }, {
-                view: "multiview",
-                cells: [events, persons, documents]
-            }]
+            /**
+             * Forms in modals
+             */
+            var processForm = function(a, en) {
+                return {
+                    view: "form",
+                    id: "form" + a + en,
+                    complexData: true,
+                    borderless: true,
+                    elements: [{
+                        view: "text",
+                        label: 'Login',
+                        name: "login"
+                    }, {
+                        id: "editor",
+                        view: "ckeditor",
+                        value: "..." //text and HTML markup
+                    }, {
+                        view: "text", //label: "Дата начала",
+                        label: 'Email',
+                        name: "email" //label: "Дата конца",
+                    }, {
+                        view: "button",
+                        value: "Submit",
+                        click: submitForm(a, en)
+                    }],
+                    rules: {
+                        "email": webix.rules.isEmail,
+                        "login": webix.rules.isNotEmpty
+                    },
+                    elementsConfig: {
+                        labelPosition: "top",
+                    }
+                };
+            }
+
+
+            /**
+             * Popup modals
+             */
+            var prepareModal = function(a, en) {
+                var head = a + " " + en;
+                webix.ui({
+                    view: "window",
+                    id: "modal" + a + en,
+                    autofit: false,
+                    head: head,
+                    modal: true,
+                    move: true,
+                    position: "center",
+                    body: function() {
+                        return processForm(a, en);
+                    },
+                    //click: $$id
+                }).hide();
+            }
+
+
+            var enArr = $$("tabbar").data.options;
+            var i = 0;
+            for (i; i <= enArr.length - 1; i++) {
+                var aArr = $$("toolbar").getChildViews();
+                var k = 0;
+                for (k; k <= aArr.length - 3; k++) {
+                    prepareModal(aArr[k].data.action, enArr[i].id);
+                }
+            }
+
         });
-    })
-
     </script>
 </body>
 
 </html>
-
